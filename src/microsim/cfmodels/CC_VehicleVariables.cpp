@@ -16,6 +16,9 @@
 #include "CC_VehicleVariables.h"
 
 //initialize default L and K matrices
+
+//reference front vehicle only
+
 const int CC_VehicleVariables::defaultL[][MAX_N_CARS] =
     {
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -38,6 +41,46 @@ const double CC_VehicleVariables::defaultK[][MAX_N_CARS] =
     {80 , 0  , 0  , 0  , 0  , 860, 0  , 0},
     {80 , 0  , 0  , 0  , 0  , 0  , 860, 0}
     };
+
+//reference all vehicles in the front
+
+//const int CC_VehicleVariables::defaultL[][MAX_N_CARS] =
+//    {
+//    {0, 0, 0, 0, 0, 0, 0, 0},
+//    {1, 0, 0, 0, 0, 0, 0, 0},
+//    {1, 1, 0, 0, 0, 0, 0, 0},
+//    {1, 1, 1, 0, 0, 0, 0, 0},
+//    {1, 1, 1, 1, 0, 0, 0, 0},
+//    {1, 1, 1, 1, 1, 0, 0, 0},
+//    {1, 1, 1, 1, 1, 1, 0, 0},
+//    {1, 1, 1, 1, 1, 1, 1, 0}
+//    };
+//const double CC_VehicleVariables::defaultK[][MAX_N_CARS] =
+//    {
+//    {0  , 0  , 0  , 0  , 0  , 0  , 0  , 0},
+//    {460, 0  , 0  , 0  , 0  , 0  , 0  , 0},
+//    {80 , 860, 0  , 0  , 0  , 0  , 0  , 0},
+//    {80 , 430  , 430, 0  , 0  , 0  , 0  , 0},
+//    {80 , 286  , 287  , 287, 0  , 0  , 0  , 0},
+//    {80 , 215  , 215  , 215  , 215, 0  , 0  , 0},
+//    {80 , 172  , 172  , 172  , 172  , 172, 0  , 0},
+//    {80 , 143  , 143  , 143  , 143  , 144  , 144, 0}
+//    };
+
+//D controller
+
+const double CC_VehicleVariables::defaultKD[][MAX_N_CARS] =
+    {
+    {0  , 0  , 0  , 0  , 0  , 0  , 0  , 0},
+    {460, 0  , 0  , 0  , 0  , 0  , 0  , 0},
+    {80 , 860, 0  , 0  , 0  , 0  , 0  , 0},
+    {80 , 0  , 860, 0  , 0  , 0  , 0  , 0},
+    {80 , 0  , 0  , 860, 0  , 0  , 0  , 0},
+    {80 , 0  , 0  , 0  , 860, 0  , 0  , 0},
+    {80 , 0  , 0  , 0  , 0  , 860, 0  , 0},
+    {80 , 0  , 0  , 0  , 0  , 0  , 860, 0}
+    };
+
 const double CC_VehicleVariables::defaultB[MAX_N_CARS] = {1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800};
 const double CC_VehicleVariables::defaultH[MAX_N_CARS] = {0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8};
 
@@ -74,6 +117,7 @@ CC_VehicleVariables::CC_VehicleVariables() :
     //init L, K, b, and h with default values
     memcpy(L, defaultL, sizeof(int)*MAX_N_CARS*MAX_N_CARS);
     memcpy(K, defaultK, sizeof(double)*MAX_N_CARS*MAX_N_CARS);
+    memcpy(KD, defaultKD, sizeof(double)*MAX_N_CARS*MAX_N_CARS);
     memcpy(b, defaultB, sizeof(double)*MAX_N_CARS);
     memcpy(h, defaultH, sizeof(double)*MAX_N_CARS);
     //no data about any vehicle has been set

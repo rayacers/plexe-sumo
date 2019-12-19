@@ -37,6 +37,8 @@
 #include <libsumo/Vehicle.h>
 #include <libsumo/TraCIDefs.h>
 
+#include <stdio.h>
+
 #ifndef sgn
 #define sgn(x) ((x > 0) - (x < 0))
 #endif
@@ -454,6 +456,14 @@ MSCFModel_CC::_v(const MSVehicle* const veh, double gap2pred, double egoSpeed, d
     }
 
     speed = MAX2(double(0), egoSpeed + ACCEL2SPEED(controllerAcceleration));
+	
+    /**************Test******************/
+//    FILE *fp;
+//    fp = fopen("check.log","a+");
+//    fprintf(fp,"ca:%lf speed:%lf ct:%lf time:%lf\n",controllerAcceleration,speed,currentTime,time);
+//    fclose(fp);
+    /************End Test****************/
+
 
     return speed;
 }
@@ -529,6 +539,55 @@ MSCFModel_CC::d_i_j(const struct Plexe::VEHICLE_DATA *vehicles, const double h[M
 
 }
 
+int
+MSCFModel_CC::CheckSteadyState(int index, double speed, double time) const{
+	static double last[8][100] = {0};
+	static double lastTime[8] = {0};
+	static int lastState[8] = {0};
+	int cnt;
+
+	/**************Test******************/
+    FILE *fp;
+    fp = fopen("CheckSteady.log","a+");
+	if(index==4){
+    	fprintf(fp,"%d:%lf %lf %lf %lf %lf %lf %lf\n",index,time,speed,last[index][0],last[index][1],last[index][2],last[index][3],last[index][4]);
+	}
+    fclose(fp);
+    /************End Test****************/
+
+
+	if(time==lastTime[index] && lastTime[index]!=0){
+		return lastState[index];
+	}
+	lastTime[index] = time;
+	
+	if(time<=10){
+		lastState[index] = 0;
+		return 0;
+	}
+
+	for(int i=0 ; i<99 ; i++){
+		last[index][i] = last[index][i+1];
+	}
+	last[index][99] = speed;
+
+	cnt = 0;
+	for(int i=0 ; i<99 ; i++){
+		if(last[index][i]-last[index][i+1]<=0.0001 && last[index][i]-last[index][i+1]>=-0.0001){
+			cnt++;
+		}
+	}
+
+	if(cnt == 99){
+		lastState[index] = 1;
+    	return 1;
+	}
+	else{
+		lastState[index] = 0;
+		return 0;
+	}
+}
+
 double
 MSCFModel_CC::_consensus(const MSVehicle* veh, double egoSpeed, Position egoPosition, double time) const {
     //TODO: this controller, by using real GPS coordinates, does only work
@@ -540,7 +599,7 @@ MSCFModel_CC::_consensus(const MSVehicle* veh, double egoSpeed, Position egoPosi
     struct Plexe::VEHICLE_DATA *vehicles = vars->vehicles;
 
     //loop variable
-    int j;
+    int j,k;
     //control input
     double u_i = 0;
     //actual distance term
@@ -551,14 +610,97 @@ MSCFModel_CC::_consensus(const MSVehicle* veh, double egoSpeed, Position egoPosi
     double speedError = 0;
     //degree of agent i
     double d_i = 0;
+    static int steadyState[8] = {0};
+	static int moveForward[8] = {0};
+	static int detectComplete[8] = {0};
+	static double lastChangeTime[8] = {0};
+
+	steadyState[index] = CheckSteadyState(index,egoSpeed,time);
+	
+//	detect error: change weight directly after steady
+//	if( index >= 2 ){
+//		if( steadyState[index] == 1 && moveForward[index] == 0 ){
+//			vars->L[index][index-2] = 1;
+//	        vars->L[index][index-1] = 0;
+//	        vars->K[index][index-2] = 860;
+//	        vars->K[index][index-1] = 0;
+//			moveForward[index] = 1;
+//		}
+//	}
+	
+//	detect error: change weight after all steady
+	int cnt = 0;
+	for( j = 0 ; j < 8 ; j++ ){
+		cnt += steadyState[j];
+	}
+//
+//	if( cnt >= 6 ){
+//		for( j = 2 ; j < 8 ; j++ ){
+//			if(steadyState[j] == 1){
+//				vars->L[j][j-2] = 1;
+//	        	vars->L[j][j-1] = 0;
+//	        	vars->K[j][j-2] = 860;
+//	        	vars->K[j][j-1] = 0;
+//			}
+//		}
+//	}
 
     //compensate my position: compute prediction of what will be my position at time of actuation
     Position egoVelocity = veh->getVelocityVector();
     egoPosition.set(egoPosition.x() + egoVelocity.x() * STEPS2TIME(DELTA_T),
                     egoPosition.y() + egoVelocity.y() * STEPS2TIME(DELTA_T));
+    //last = vehicles[index].speed;
     vehicles[index].speed = egoSpeed;
     vehicles[index].positionX = egoPosition.x();
     vehicles[index].positionY = egoPosition.y();
+
+	//method: ray & ray2 method
+	if( cnt == 6 && detectComplete[index] == 0){
+		detectComplete[index] = 1;
+		double distance[8];
+		for( j = 0 ; j < nCars ; j++ ){
+			if( j == index ){
+				distance[j] = 0;
+				continue;
+			}
+			Position otherPosition;
+        	double dt = time - vehicles[j].time;
+        	//predict the position of the other vehicle
+        	otherPosition.setx(vehicles[j].positionX + dt * vehicles[j].speedX);
+        	otherPosition.sety(vehicles[j].positionY + dt * vehicles[j].speedY);
+        	distance[j] = egoPosition.distanceTo2D(otherPosition) * sgn(j - index);
+		}
+	    FILE *fp;
+    	fp = fopen("distance.log","a+");
+		int errorCount[7] = {0};
+		for( j = 0 ; j < nCars-1 ; j++ ){
+			distance[j] = distance[j+1]-distance[j];
+		}
+		for( j = 0 ; j < nCars-1 ; j++ ){
+			for( k = j + 1 ; k < nCars-1 ; k++ ){
+				if( distance[j] - distance[k] >= 0.05 * distance[j] || distance[k] - distance[j] >= 0.05 * distance[j] ){
+					errorCount[j]++;
+					errorCount[k]++;
+				}
+			}
+		}
+    	for( j = nCars-2 ; j >= 0 ; j-- ){
+    		fprintf(fp,"%d: %lf %d\n",j,distance[j],errorCount[j]);
+			if( errorCount[j] >= 3 ){
+				for( k = j+2 ; k < nCars ; k++){
+					fprintf(fp, "%d %d %lf\n", k, j, vars->K[k][j+1]);
+					if(vars->L[k][j+1] == 1){
+						vars->L[k][j+1] = 0;
+		    			vars->L[k][j] = 1;
+		    			vars->K[k][j+1] = 0;
+		    			vars->K[k][j] = 860;
+					}
+				}
+			}
+		}
+		fclose(fp);	
+    }
+
 
     //check that data from all vehicles have been received. the control
     //law might actually need a subset of all the data, but d_i_j needs
@@ -596,6 +738,15 @@ MSCFModel_CC::_consensus(const MSVehicle* veh, double egoSpeed, Position egoPosi
 
     //original paper formula
     u_i = (speedError + desiredDistance + actualDistance)/1000;
+
+    /**************Test******************/
+    //FILE *fp;
+    //fp = fopen("Veh4.log","a+");
+    //if(index==4){
+    //	fprintf(fp,"%d:%lf %lf %lf\n",index,time,vehicles[3].time,egoSpeed);
+    //}
+    //fclose(fp);
+    /************End Test****************/
 
     return u_i;
 }

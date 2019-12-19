@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/plexe/src/plexe-sumo/src/foreign/eulerspiral/odrSpiral.cpp
+stdio.h
+-
+math.h
+-
+

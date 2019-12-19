@@ -341,6 +341,8 @@ private:
      * @param[in] time current time
      * @return the acceleration to be given to the actuator
      */
+    int CheckSteadyState(int index, double speed, double time) const;
+
     double _consensus(const MSVehicle* veh, double egoSpeed, Position egoPosition, double time) const;
 
     /** @brief computes the desired distance between vehicle i and vehicle j

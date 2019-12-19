@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnetedit_frames.a  CMakeFiles/netedit_frames.dir/GNEFrame.cpp.o CMakeFiles/netedit_frames.dir/GNEInspectorFrame.cpp.o CMakeFiles/netedit_frames.dir/GNESelectorFrame.cpp.o CMakeFiles/netedit_frames.dir/GNEConnectorFrame.cpp.o CMakeFiles/netedit_frames.dir/GNETLSEditorFrame.cpp.o CMakeFiles/netedit_frames.dir/GNEAdditionalFrame.cpp.o CMakeFiles/netedit_frames.dir/GNECrossingFrame.cpp.o CMakeFiles/netedit_frames.dir/GNEDeleteFrame.cpp.o CMakeFiles/netedit_frames.dir/GNEPolygonFrame.cpp.o
+/usr/bin/ranlib libnetedit_frames.a

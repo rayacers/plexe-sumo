@@ -76,6 +76,11 @@ public:
     const static double defaultK[MAX_N_CARS][MAX_N_CARS];
 
     /**
+     * Gains matrix KD for the consensus controller
+     */
+    const static double defaultKD[MAX_N_CARS][MAX_N_CARS];
+
+    /**
      * Default damping ratios vector b for the consensus controller
      */
     const static double defaultB[];
@@ -162,6 +167,8 @@ public:
     int L[MAX_N_CARS][MAX_N_CARS];
     /// @brief K matrix
     double K[MAX_N_CARS][MAX_N_CARS];
+    /// @brief KD matrix
+    double KD[MAX_N_CARS][MAX_N_CARS];
     /// @brief vector of damping ratios b
     double b[MAX_N_CARS];
     /// @brief vector of time headways h
