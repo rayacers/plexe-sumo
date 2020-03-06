@@ -69,17 +69,17 @@ const double CC_VehicleVariables::defaultK[][MAX_N_CARS] =
 
 //D controller
 
-const double CC_VehicleVariables::defaultKD[][MAX_N_CARS] =
-    {
-    {0  , 0  , 0  , 0  , 0  , 0  , 0  , 0},
-    {460, 0  , 0  , 0  , 0  , 0  , 0  , 0},
-    {80 , 860, 0  , 0  , 0  , 0  , 0  , 0},
-    {80 , 0  , 860, 0  , 0  , 0  , 0  , 0},
-    {80 , 0  , 0  , 860, 0  , 0  , 0  , 0},
-    {80 , 0  , 0  , 0  , 860, 0  , 0  , 0},
-    {80 , 0  , 0  , 0  , 0  , 860, 0  , 0},
-    {80 , 0  , 0  , 0  , 0  , 0  , 860, 0}
-    };
+//const double CC_VehicleVariables::defaultKD[][MAX_N_CARS] =
+//    {
+//    {0  , 0  , 0  , 0  , 0  , 0  , 0  , 0},
+//    {460, 0  , 0  , 0  , 0  , 0  , 0  , 0},
+//    {80 , 860, 0  , 0  , 0  , 0  , 0  , 0},
+//    {80 , 0  , 860, 0  , 0  , 0  , 0  , 0},
+//    {80 , 0  , 0  , 860, 0  , 0  , 0  , 0},
+//    {80 , 0  , 0  , 0  , 860, 0  , 0  , 0},
+//    {80 , 0  , 0  , 0  , 0  , 860, 0  , 0},
+//    {80 , 0  , 0  , 0  , 0  , 0  , 860, 0}
+//    };
 
 const double CC_VehicleVariables::defaultB[MAX_N_CARS] = {1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800};
 const double CC_VehicleVariables::defaultH[MAX_N_CARS] = {0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8};
